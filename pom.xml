@@ -136,14 +136,6 @@
         
         <dependency>
             <groupId>org.grails.plugins</groupId>
-            <artifactId>cache</artifactId>
-            <version>1.1.1</version>
-            <scope>compile</scope>
-            <type>zip</type>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.grails.plugins</groupId>
             <artifactId>hibernate</artifactId>
             <version>3.6.10.6</version>
             <scope>runtime</scope>
