@@ -44,6 +44,7 @@ grails.project.dependency.resolution = {
     inherits("global") {
         // specify dependency exclusions here; for example, uncomment this to disable ehcache:
         // excludes 'ehcache'
+		excludes "logback-classic"
     }
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
@@ -66,8 +67,7 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.24'
-		compile "au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT"
-		compile "au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT"
+		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT") {excludes ([group:"ch.qos.logback", name:"logback-classic"],[group:"ch.qos.logback", name:"logback-core"])}		
     }
 
     plugins {

@@ -38,15 +38,14 @@ class HarvesterManager {
 		harvesters.each {
 			if (it.value.config.web?.autoStart)
 				start(it.key)
-		}
-		
+		}		
 	}
 	
 	/** Starts all loaded harvesters
 	 * 
 	 * @return
 	 */
-	public void startAll() {
+	public synchronized void startAll() {
 		if (!harvesters) {
 			load()
 		}	
@@ -59,21 +58,21 @@ class HarvesterManager {
 	 * 
 	 * @return
 	 */
-	public void stopAll() {
+	public synchronized void stopAll() {
 		harvesters?.each {
 			it.value.stop()
 		}	
 	}
 	
-	public void stop(String harvestId) {
-		harvesters[harvestId].stop()
+	public synchronized void stop(String harvesterId) {
+		harvesters[harvesterId].stop()
 	}
 	
 	/** Stops, reloads configuration and starts all harvesters
 	 * 
 	 * @return
 	 */
-	public void reloadAndStartAll() {
+	public synchronized void reloadAndStartAll() {
 		stopAll()
 		load()
 		startAll()
@@ -87,6 +86,10 @@ class HarvesterManager {
 			config = grailsApplication.config
 			parentContext = grailsApplication.mainContext
 		}
+		def harvestBase = new File(config.harvest.base)
+		if (!harvestBase.exists()) {
+			harvestBase.mkdirs()
+		}
 		harvesters = [:]
 		config.harvest.clientConfigObjs = [:]
 		def clientConfigs = config.harvest.clients
@@ -95,11 +98,11 @@ class HarvesterManager {
 		}
 	}
 	
-	public void start(String harvestId) {
-		def clientConfigObj = config.clientConfigObjs[harvestId]
+	public synchronized void start(String harvesterId) {
+		def clientConfigObj = config.clientConfigObjs[harvesterId]
 		// set the current config object
 		config.clientConfigObj = clientConfigObj
-		harvesters[harvestId].start()
+		harvesters[harvesterId].start()
 	}
 	
 	/**
@@ -107,43 +110,47 @@ class HarvesterManager {
 	 * 
 	 * @return
 	 */
-	public String[] list() {
-		def harvestIds = []
-		harvesters.keySet().each {
-			harvestIds << it
-		}
-		return harvestIds
+	public synchronized String[] list() {
+		return harvesters.keySet().toArray(new String[0])
 	}
 	
 	/**
-	 * Adds a harvester to the runtime configuration 
+	 *  Adds a harvester to the runtime configuration. 
+	 * 
+	 *  If the configPath is blank, "harvester-config.groovy" is used.
+	 * 
+	 *  If the packagePath is blank, it is assumed that the configuration file is available in the classpath.
 	 * 
 	 * @return
 	 */
-	public void add(String configPath, String jarPath="") {
-		String harvestId = configPath.lastIndexOf('.').with {it != -1 ? configPath[0..<it] : configPath }.toString()
-		if (harvesters[harvestId]) {
-			log.error("This harvester is already on the system, ignoring:" + harvestId)
+	public synchronized void add(String harvesterId, String configPath="", String packagePath="") {
+		if (harvesters[harvesterId]) {
+			log.error("This harvester is already on the system, ignoring:" + harvesterId)
 			return
 		}
-		if (jarPath.size() > 0) {
-			log.debug("Adding client classpath:" + jarPath)
-			HarvesterManager.class.classLoader.addClasspath(jarPath)
+		if (packagePath != "") {
+			log.debug("Adding client classpath:" + packagePath)
+			HarvesterManager.class.classLoader.addClasspath(packagePath)
 			AntBuilder ant = new AntBuilder()
-			ant.unzip(src: jarPath, dest:config.harvest.base + harvestId, overwrite:false)
+			ant.unzip(src: packagePath, dest:config.harvest.base + harvesterId, overwrite:false)
 		}
-		def binding = [config:config, parentContext:parentContext, configPath:configPath, harvestId:harvestId]
-		def clientConfigObj = Config.getConfig(config.environment, configPath, config.harvest.base + harvestId + "/", binding)
+		if (configPath == "") {
+			configPath = "harvester-config.groovy"
+		}
+		def binding = [config:config, parentContext:parentContext, configPath:configPath, harvesterId:harvesterId]
+		def clientConfigObj = Config.getConfig(config.environment, configPath, config.harvest.base + harvesterId + "/", binding)
 		if (!clientConfigObj) {
 			log.error("Failed to load main config file from class path or system path. Please confirm:" + configPath)
 			return
 		}
 		// add the parentContext
 		clientConfigObj.runtime.parentContext = parentContext
-		clientConfigObj.runtime.jarPath = jarPath
+		clientConfigObj.runtime.jarPath = packagePath
 		// make this harvest configuration available from the global config
-		config.clientConfigObjs[harvestId] = clientConfigObj
-		harvesters[harvestId] = new Harvester(config:clientConfigObj)
+		config.clientConfigObjs[harvesterId] = clientConfigObj
+		harvesters[harvesterId] = new Harvester(config:clientConfigObj)
+		config.runtimeConfig.harvest.clients.put(harvesterId, configPath)
+		Config.saveConfig(config.runtimeConfig)
 	}
 	
 		
@@ -154,17 +161,117 @@ class HarvesterManager {
 	 * 
 	 * @return
 	 */
-	public void remove(String harvestId) {
-		if (harvesters[harvestId]) {
-			harvesters[harvestId].stop()
-			String harvesterDir = config.harvest.base + harvestId
+	public synchronized void remove(String harvesterId) {
+		if (harvesters[harvesterId]) {
+			harvesters[harvesterId].stop()
+			String harvesterDir = config.harvest.base + harvesterId
 			log.debug("Deleting harvest directory:" + harvesterDir) 			
 			new File(harvesterDir).deleteDir()
-			new File(config.harvest.base + harvestId + ".groovy").delete()
-			harvesters.remove(harvestId)				
+			new File(config.harvest.base + harvesterId + ".groovy").delete()
+			harvesters.remove(harvesterId)		
+			config.runtimeConfig.harvest.clients.remove(harvesterId)
+			Config.saveConfig(config.runtimeConfig)
 		} else {
-			log.debug("Tried to remove a non-existent harvester:" + harvestId)
+			log.debug("Tried to remove a non-existent harvester:" + harvesterId)
 		}
 	}
 	
+	/**
+	 * Create a harvester from a template.
+	 * 
+	 * @param harvesterId
+	 * @param templateName
+	 */
+	public synchronized void createFromTemplate(String harvesterId, String templateName) {
+		create harvesterId using templateName
+	}
+	
+	def create(harvesterId) {
+		if (!harvesterId) {
+			def msg = "No harvester name specified."
+			log.error msg
+			return msg
+		}		
+		if (harvesters && harvesters[harvesterId]) {
+			def msg = "Harvester already exists."
+			log.error msg
+			return msg
+		}
+		[using: {templateName ->
+			if (!templateName) {
+				def msg = "Please select a template."
+				log.error msg				
+				return msg
+			}
+			log.info "Creating ${harvesterId} using ${templateName}"
+			if (config.harvest.templates.keySet().contains(templateName)) {
+				def targetPath = "${config.harvest.base}${harvesterId}.zip"
+				def fs = new FileOutputStream(targetPath)
+				def out = new BufferedOutputStream(fs)
+				out << new URL(config.harvest.templates[templateName].location).openStream()
+				out.close()
+				fs.close()				
+				add(harvesterId, "", targetPath)
+			} else {
+				def msg = "Invalid template name."
+				log.error msg
+				return msg
+			}
+			return true
+		}]
+	}
+	
+	/**
+	 * Packages all harvester configuration files into a compressed file.
+	 * 
+	 * @param harvesterId
+	 */
+	public synchronized void pack(String harvesterId, String destFileName = "") {
+		def targetDir = new File(config.harvest.base + harvesterId)
+		if (!targetDir.exists()) {
+			log.error "Cannot package harvester, it does not exist:" + harvesterId
+			return
+		}
+		if (destFileName == "") {
+			destFileName = targetDir.getAbsolutePath() + ".zip"
+		}		
+		new AntBuilder().zip(destFile:destFileName) {
+			fileSet(dir: targetDir.getAbsolutePath())
+		}
+		log.debug("Harvester '${harvesterId}' packaged to: ${destFileName}")
+	}
+	
+	/**
+	 * List available templates.
+	 * @return
+	 */
+	public String[] listTemplates() {
+		return config.harvest.templates.keySet().toArray(new String[0])
+	}
+	
+	/**
+	 * Return this template's location
+	 * 
+	 * @param templateName
+	 * @return
+	 */
+	public String getTemplateLocation(String templateName) {
+		if (!config.harvest.templates[templateName]?.location) {
+			return "No such template/location: ${templateName}" 
+		}
+		return config.harvest.templates[templateName].location
+	}
+	
+	/**
+	 * Return this template's description
+	 * 
+	 * @param templateName
+	 * @return
+	 */
+	public String getTemplateDescription(String templateName) {
+		if (!config.harvest.templates[templateName]?.description) {
+			return "No such template/description: ${templateName}"
+		}
+		return config.harvest.templates[templateName].description
+	}		
 }

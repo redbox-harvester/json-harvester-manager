@@ -26,7 +26,7 @@
 appName = "${appName}"
 userHome = "${userHome}".replace("\\", "/")
 environment = environment
-grails.config.locations = ["classpath:main-config.groovy", "file:${userHome}/.grails/${appName}/main-config.groovy"]
+grails.config.locations = ["classpath:main-config.groovy", "file:${userHome}/.grails/${appName}/config/runtime/main-config.groovy"]
 
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]

@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>au.com.redboxresearchdata</groupId>
-    <artifactId>json-harvester-client-web</artifactId>
+    <artifactId>json-harvester-manager</artifactId>
     <packaging>grails-app</packaging>
     <version>0.1-SNAPSHOT</version>
 
-    <name>json-harvester-client-web</name>
-    <description>json-harvester-client-web</description>
+    <name>json-harvester-manager</name>
+    <description>json-harvester-manager</description>
 
     <properties>
         <grails.version>2.3.4</grails.version>

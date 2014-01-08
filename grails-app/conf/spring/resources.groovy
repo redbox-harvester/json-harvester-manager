@@ -22,15 +22,12 @@ import org.springframework.jmx.export.MBeanExporter
 beans = {
 	harvesterManager(au.com.redboxresearchdata.harvester.client.HarvesterManager) {
 		grailsApplication = ref('grailsApplication') 
-	}
-	
-			mbeanServer(MBeanServerFactoryBean) {
-				locateExistingServerIfPossible=true
-			}	
-			exporter(MBeanExporter) {
-				server = mbeanServer
-				beans = ["au.com.redboxresearchdata.harvester.client:name=harvesterManager":harvesterManager]
-			}
-		
-	
+	}	
+	mbeanServer(MBeanServerFactoryBean) {
+		locateExistingServerIfPossible=true
+	}	
+	exporter(MBeanExporter) {
+		server = mbeanServer
+		beans = ["au.com.redboxresearchdata.harvester.client:name=harvesterManager":harvesterManager]
+	}			
 }

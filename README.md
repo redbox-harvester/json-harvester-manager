@@ -1,5 +1,4 @@
-JSON Harvester Manager
+JSON Harvester Manager Server
 ======================
 
-Harvester manager for JSON Harvester Clients.
- 
+An execution and management platform for one or more JSON Harvester clients: https://github.com/redbox-mint-contrib/json-harvester-client.  
