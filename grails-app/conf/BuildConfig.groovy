@@ -65,13 +65,13 @@ grails.project.dependency.resolution = {
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
-        // runtime 'mysql:mysql-connector-java:5.1.24'
-		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT") {excludes ([group:"ch.qos.logback", name:"logback-classic"],[group:"ch.qos.logback", name:"logback-core"])}		
+		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT")		
     }
 
     plugins {
         // plugins for the build system only
         build ":tomcat:7.0.47"
+		build ":release:3.0.1"
 
         // plugins for the compile step
         compile ":scaffolding:2.0.1"
