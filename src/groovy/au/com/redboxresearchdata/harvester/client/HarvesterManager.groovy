@@ -137,7 +137,7 @@ class HarvesterManager {
 		if (configPath == "") {
 			configPath = "harvester-config.groovy"
 		}
-		def binding = [config:config, parentContext:parentContext, configPath:configPath, harvesterId:harvesterId]
+		def binding = [config:config, parentContext:parentContext, configPath:configPath, harvesterId:harvesterId, managerBase:config.harvest.base]
 		def clientConfigObj = Config.getConfig(config.environment, configPath, config.harvest.base + harvesterId + "/", binding)
 		if (!clientConfigObj) {
 			log.error("Failed to load main config file from class path or system path. Please confirm:" + configPath)
