@@ -58,10 +58,8 @@ class Harvester {
 
 		ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
 		String[] locs = ["file:"+config.client.siPath]
-		appContext = new FileSystemXmlApplicationContext(locs, true, parentContext)
-		appContext.refresh()
-		appContext.registerShutdownHook()
-		appContext.start()
+		appContext = new FileSystemXmlApplicationContext(locs, true, parentContext)		
+		appContext.registerShutdownHook()		
 		log.debug("Harvester started: "+config.client.harvesterId)
 	}
 	
