@@ -64,8 +64,12 @@ class HarvesterManager {
 		}	
 	}
 	
-	public synchronized void stop(String harvesterId) {
-		harvesters[harvesterId].stop()
+	public synchronized Object stop(String harvesterId) {
+		if (harvesters[harvesterId]) {
+			return harvesters[harvesterId].stop()
+		} else {
+			return [success:false, message:"No such harvester to stop:" + harvesterId]
+		}
 	}
 	
 	/** Stops, reloads configuration and starts all harvesters
@@ -81,7 +85,7 @@ class HarvesterManager {
 	/** Loads all harvesters specified in the "harvest.clients" config entry 
 	 *  
 	 */
-	protected void load() {
+	public synchronized void load() {
 		if (!config) {
 			config = grailsApplication.config
 			parentContext = grailsApplication.mainContext
@@ -98,11 +102,15 @@ class HarvesterManager {
 		}
 	}
 	
-	public synchronized void start(String harvesterId) {
-		def clientConfigObj = config.clientConfigObjs[harvesterId]
-		// set the current config object
-		config.clientConfigObj = clientConfigObj
-		harvesters[harvesterId].start()
+	public synchronized Object start(String harvesterId) {
+		if (harvesters[harvesterId]) {
+			def clientConfigObj = config.clientConfigObjs[harvesterId]
+			// set the current config object
+			config.clientConfigObj = clientConfigObj
+			return harvesters[harvesterId].start()
+		} else {
+			return [success:false, message:"No such harvester to start:" + harvesterId]
+		}
 	}
 	
 	/**
@@ -123,10 +131,11 @@ class HarvesterManager {
 	 * 
 	 * @return
 	 */
-	public synchronized void add(String harvesterId, String configPath="", String packagePath="") {
+	public synchronized Object add(String harvesterId, String configPath="", String packagePath="") {
 		if (harvesters[harvesterId]) {
-			log.error("This harvester is already on the system, ignoring:" + harvesterId)
-			return
+			def msg = "This harvester is already on the system, ignoring:" + harvesterId
+			log.error(msg)			
+			return [success:false, message:msg]
 		}
 		if (packagePath != "") {
 			log.debug("Adding client classpath:" + packagePath)
@@ -134,14 +143,15 @@ class HarvesterManager {
 			AntBuilder ant = new AntBuilder()
 			ant.unzip(src: packagePath, dest:config.harvest.base + harvesterId, overwrite:false)
 		}
-		if (configPath == "") {
+		if (configPath == null || configPath == "") {
 			configPath = "harvester-config.groovy"
 		}
 		def binding = [config:config, parentContext:parentContext, configPath:configPath, harvesterId:harvesterId, managerBase:config.harvest.base]
 		def clientConfigObj = Config.getConfig(config.environment, configPath, config.harvest.base + harvesterId + "/", binding)
 		if (!clientConfigObj) {
-			log.error("Failed to load main config file from class path or system path. Please confirm:" + configPath)
-			return
+			def msg = "Failed to load main config file from class path or system path. Please confirm:" + configPath
+			log.error(msg)
+			return [success:false, message:msg]
 		}
 		// add the parentContext
 		clientConfigObj.runtime.parentContext = parentContext
@@ -151,6 +161,7 @@ class HarvesterManager {
 		harvesters[harvesterId] = new Harvester(config:clientConfigObj)
 		config.runtimeConfig.harvest.clients.put(harvesterId, configPath)
 		Config.saveConfig(config.runtimeConfig)
+		return [success:true, message:"Added new harvester:"+harvesterId]
 	}
 	
 		
@@ -161,7 +172,7 @@ class HarvesterManager {
 	 * 
 	 * @return
 	 */
-	public synchronized void remove(String harvesterId) {
+	public synchronized Object remove(String harvesterId) {
 		if (harvesters[harvesterId]) {
 			harvesters[harvesterId].stop()
 			String harvesterDir = config.harvest.base + harvesterId
@@ -171,8 +182,11 @@ class HarvesterManager {
 			harvesters.remove(harvesterId)		
 			config.runtimeConfig.harvest.clients.remove(harvesterId)
 			Config.saveConfig(config.runtimeConfig)
+			return [success:true, message:"Removed harvester:"+harvesterId]
 		} else {
-			log.debug("Tried to remove a non-existent harvester:" + harvesterId)
+			def msg = "Tried to remove a non-existent harvester:" + harvesterId
+			log.debug(msg)
+			return [success:false, message:msg]
 		}
 	}
 	
@@ -182,26 +196,27 @@ class HarvesterManager {
 	 * @param harvesterId
 	 * @param templateName
 	 */
-	public synchronized void createFromTemplate(String harvesterId, String templateName) {
-		create harvesterId using templateName
+	public synchronized Object createFromTemplate(String harvesterId, String templateName) {
+		def retval = create harvesterId using templateName
+		return retval
 	}
 	
 	def create(harvesterId) {
 		if (!harvesterId) {
 			def msg = "No harvester name specified."
 			log.error msg
-			return msg
+			return [success:false, message:msg]
 		}		
 		if (harvesters && harvesters[harvesterId]) {
 			def msg = "Harvester already exists."
 			log.error msg
-			return msg
+			return [success:false, message:msg]
 		}
 		[using: {templateName ->
 			if (!templateName) {
 				def msg = "Please select a template."
 				log.error msg				
-				return msg
+				return [success:false, message:msg]
 			}
 			log.info "Creating ${harvesterId} using ${templateName}"
 			if (config.harvest.templates.keySet().contains(templateName)) {
@@ -211,13 +226,12 @@ class HarvesterManager {
 				out << new URL(config.harvest.templates[templateName].location).openStream()
 				out.close()
 				fs.close()				
-				add(harvesterId, "", targetPath)
+				return add(harvesterId, "", targetPath)
 			} else {
 				def msg = "Invalid template name."
 				log.error msg
-				return msg
-			}
-			return true
+				return [success:false, message:msg]
+			}			
 		}]
 	}
 	
@@ -226,19 +240,30 @@ class HarvesterManager {
 	 * 
 	 * @param harvesterId
 	 */
-	public synchronized void pack(String harvesterId, String destFileName = "") {
+	public synchronized Object pack(String harvesterId, String destFileName = "") {
 		def targetDir = new File(config.harvest.base + harvesterId)
 		if (!targetDir.exists()) {
-			log.error "Cannot package harvester, it does not exist:" + harvesterId
-			return
+			def msg = "Cannot package harvester, it does not exist:" + harvesterId
+			log.error msg
+			return [success:false, message:msg]
 		}
-		if (destFileName == "") {
+		if (destFileName == null || destFileName == "") {
 			destFileName = targetDir.getAbsolutePath() + ".zip"
+		} else {
+			if (destFileName.indexOf("/") >= 0 || destFileName.indexOf("\\") >= 0) {
+				def msg = "Cannot package harvester, the specified destination:'${destFileName}' is invalid. Please specify a file name, not a path."
+				log.error msg
+				return [success:false, message:msg]
+			}
+			// make sure the destination is within the harvest.base
+			destFileName = config.harvest.base+destFileName			
 		}		
 		new AntBuilder().zip(destFile:destFileName) {
 			fileSet(dir: targetDir.getAbsolutePath())
 		}
-		log.debug("Harvester '${harvesterId}' packaged to: ${destFileName}")
+		def msg = destFileName
+		log.debug msg
+		return [success:true, message:msg]
 	}
 	
 	/**
@@ -255,11 +280,8 @@ class HarvesterManager {
 	 * @param templateName
 	 * @return
 	 */
-	public String getTemplateLocation(String templateName) {
-		if (!config.harvest.templates[templateName]?.location) {
-			return "No such template/location: ${templateName}" 
-		}
-		return config.harvest.templates[templateName].location
+	public Object getTemplateLocation(String templateName) {		
+		return config.harvest.templates[templateName]?.location ? [success:true, message:config.harvest.templates[templateName].location] : [success:false, message:"No such template/location: ${templateName}"]
 	}
 	
 	/**
@@ -268,10 +290,16 @@ class HarvesterManager {
 	 * @param templateName
 	 * @return
 	 */
-	public String getTemplateDescription(String templateName) {
-		if (!config.harvest.templates[templateName]?.description) {
-			return "No such template/description: ${templateName}"
-		}
-		return config.harvest.templates[templateName].description
+	public Object getTemplateDescription(String templateName) {		
+		return config.harvest.templates[templateName]?.description ? [success:true, message:config.harvest.templates[templateName].description] : [success:false, message:"No such template/description: ${templateName}"] 
+	}
+	/**
+	 * Checks if this harvester has started.
+	 * 
+	 * @param harvesterId
+	 * @return
+	 */
+	public boolean isStarted(String harvesterId) {
+		return harvesters[harvesterId] && harvesters[harvesterId].isStarted() 		
 	}		
 }

@@ -47,8 +47,9 @@ class Harvester {
 	 */
 	def start() {
 		if (appContext) {
-			log.debug("Harvester has already started, ignoring start request:" + config.client.harvesterId)
-			return
+			def msg = "Harvester has already started, ignoring start request:" + config.client.harvesterId
+			log.debug(msg)
+			return [success:false, message:msg]
 		}
 		config.client.classPathEntries?.each {
 			String entryTargetPath = config.client.base + it
@@ -59,8 +60,10 @@ class Harvester {
 		ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
 		String[] locs = ["file:"+config.client.siPath]
 		appContext = new FileSystemXmlApplicationContext(locs, true, parentContext)		
-		appContext.registerShutdownHook()		
-		log.debug("Harvester started: "+config.client.harvesterId)
+		appContext.registerShutdownHook()
+		def msg = "Harvester started: "+config.client.harvesterId 		
+		log.debug(msg)
+		return [success:true, message:msg]
 	}
 	
 	/**
@@ -70,14 +73,21 @@ class Harvester {
 	 */
 	def stop() {
 		if (!appContext) {
-			log.debug("Harvester has stopped, ignoring stop request:" + config.client.harvesterId)
-			return
+			def msg = "Harvester has stopped, ignoring stop request:" + config.client.harvesterId
+			log.debug(msg)
+			return [success:false, message:msg]
 		}
 		log.debug("Harvester stopping:" + config.client.harvesterId + ", using inbound adapter:" + config.client.inboundAdapter.toString())		
 		AbstractEndpoint inboundEndpoint = appContext.getBean(config.client.inboundAdapter.toString(), AbstractEndpoint.class)
 		inboundEndpoint.stop()
 		appContext.stop()
 		appContext = null
-		log.debug("Harvester stopped:" + config.client.harvesterId)
+		def msg = "Harvester stopped:" + config.client.harvesterId
+		log.debug(msg)
+		return [success:true, message:msg]
+	}
+	
+	def isStarted() {
+		return appContext != null && appContext.isRunning()
 	}
 }
