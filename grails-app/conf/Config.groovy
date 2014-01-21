@@ -26,7 +26,7 @@
 appName = "${appName}"
 userHome = "${userHome}".replace("\\", "/")
 environment = environment
-grails.config.locations = ["classpath:main-config.groovy", "file:${userHome}/.grails/${appName}/config/runtime/main-config.groovy"]
+grails.config.locations = ["classpath:main-config.groovy", "file:${userHome}/.${appName}-${environment}/config/runtime/main-config.groovy"]
 
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
@@ -122,15 +122,28 @@ log4j = {
 	//    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
 	//}
 	
-	appenders {
-		rollingFile name: "mainRollingFileAppender", maxFileSize:1048576, maxFileIndex:10, file:"${config.userHome}/.grails/${config.appName}/logs/main.log"
+	appenders {		
+		rollingFile name: "mainRollingFileAppender", maxFileSize:1048576, maxFileIndex:10, file:"${config.userHome}/.${config.appName}-${config.environment}/logs/main.log"
 		console name:"console"
 	}
 	
-	debug console: ['au.com.redboxresearchdata',
-		  'org.springframework.integration'],
-		  mainRollingFileAppender: ['au.com.redboxresearchdata',
-		  'org.springframework.integration'] 
+	environments {
+		development {
+			debug console: ['au.com.redboxresearchdata',
+				'org.springframework.integration'],
+				mainRollingFileAppender: ['au.com.redboxresearchdata',
+				'org.springframework.integration']
+		}
+		test {
+			debug console: ['au.com.redboxresearchdata',
+				'org.springframework.integration']
+		}
+		production {
+			mainRollingFileAppender: ['au.com.redboxresearchdata',
+				'org.springframework.integration']
+		}
+	}
+	
 
 	error 'org.codehaus.groovy.grails.web.servlet',        // controllers
 		   'org.codehaus.groovy.grails.web.pages',          // GSP

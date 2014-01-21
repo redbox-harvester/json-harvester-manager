@@ -24,13 +24,15 @@ class BootStrap {
 	def grailsApplication
 	def harvesterManager
 	
-    def init = { servletContext ->
+    def init = { servletContext ->		
 		BootStrap.class.classLoader.addClasspath(grailsApplication.config.harvest.base)
 		def userHome = grailsApplication.config.userHome
 		def appName = grailsApplication.config.appName
 		// load the main web runtime configuration
-		def binding = [userHome:userHome, appName:appName]		
-		def runtimeConfig = Config.getConfig(Environment.current.toString().toLowerCase(), "main-config.groovy", "${userHome}/.grails/${appName}/", binding)
+		def binding = [userHome:userHome, appName:appName]
+		def env = Environment.current.toString().toLowerCase()
+		def baseDir = "${userHome}/.${appName}-${env}/"		
+		def runtimeConfig = Config.getConfig(env, "main-config.groovy", baseDir, binding)								
 		grailsApplication.config.runtimeConfig = runtimeConfig
 		harvesterManager.autoStart()		
     }

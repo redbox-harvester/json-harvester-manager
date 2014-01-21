@@ -42,12 +42,21 @@ class HarvesterController {
 	}
 	
 	/**
-	 * URL: <app-url>/harvester/add/<harvester-id>
+	 * URL: <app-url>/harvester/createFromTemplate/<harvester-id>
+	 *
+	 * @return JSON: {"success":<boolean>, "message":"<Message>"}
+	 */
+	def createFromTemplate() {
+		respond harvesterManager.createFromTemplate(params.id, params.template)
+	}
+	
+	/**
+	 * URL: <app-url>/harvester/add/<harvester-id>?configPath=<optional config path of the package>&packagePath=<optional custom package path>
 	 *
 	 * @return JSON: {"success":<boolean>, "message":"<Message>"}
 	 */
 	def add() {
-		respond harvesterManager.createFromTemplate(params.id, params.template)
+		respond harvesterManager.add(params.id, params.configPath, params.packagePath)
 	}
 	
 	/**
@@ -159,7 +168,7 @@ class HarvesterController {
 			respond stat
 			return
 		}
-		def packageFile = new File(grailsApplication.config.harvest.base + harvesterPackage.getName())		
+		def packageFile = new File(grailsApplication.config.harvest.base + harvesterPackage.getOriginalFilename())		
 		harvesterPackage.transferTo(packageFile)
 		respond harvesterManager.add(params.id, params.configPath, packageFile.getAbsolutePath())		
 	}
