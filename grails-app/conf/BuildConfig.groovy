@@ -22,6 +22,10 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.work.dir = "target/work"
 grails.project.target.level = 1.6
 grails.project.source.level = 1.6
+grails.project.war.file = "target/${appName}.war"
+grails.project.repos["redbox-nexus-snapshots"].url = "http://dev.redboxresearchdata.com.au/nexus/content/repositories/snapshots/"
+grails.project.repos.default = "redbox-nexus-snapshots"
+grails.release.scm.enabled = false
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
