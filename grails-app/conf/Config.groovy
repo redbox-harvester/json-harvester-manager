@@ -139,7 +139,7 @@ log4j = {
 				'org.springframework.integration']
 		}
 		production {
-			mainRollingFileAppender: ['au.com.redboxresearchdata',
+			debug mainRollingFileAppender: ['au.com.redboxresearchdata',
 				'org.springframework.integration']
 		}
 	}

@@ -52,9 +52,8 @@ class Harvester {
 			return [success:false, message:msg]
 		}
 		config.client.classPathEntries?.each {
-			String entryTargetPath = config.client.base + it
-			log.debug("Adding to classpath:" + entryTargetPath)
-			Harvester.class.classLoader.addClasspath(entryTargetPath)
+			String entryTargetPath = config.client.base + it			
+			addToClasspath(entryTargetPath)					
 		}
 
 		ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
@@ -89,5 +88,15 @@ class Harvester {
 	
 	def isStarted() {
 		return appContext != null && appContext.isRunning()
+	}
+	
+	def addToClasspath(String entryTargetPath) {
+		if (!entryTargetPath.startsWith("file")) {
+			entryTargetPath = "file://" + entryTargetPath
+		}
+		log.debug "Attempting to dynamically add stuff to the classpath..."
+		def classLoader = Harvester.class.classLoader
+		log.debug("Adding to classpath:" + entryTargetPath)
+		classLoader.addURL(new URL(entryTargetPath))
 	}
 }

@@ -115,7 +115,7 @@ class HarvesterControllerSpec extends IntegrationSpec {
 			jsonResponse = slurper.parseText(controller.response.contentAsString)
 		then: "should return the newly added harvester."
 			jsonResponse[0] == harvesterId
-		when: "When harvester is packaged without a destination set, "
+		when: "Harvester is packaged without a destination set, "
 			controller.response.reset()			
 			controller.pack()
 		then: "it should succeed."
@@ -123,7 +123,7 @@ class HarvesterControllerSpec extends IntegrationSpec {
 			controller.response.contentAsByteArray.length > 0
 			controller.response.containsHeader("Content-disposition")
 			controller.response.getHeader("Content-disposition").indexOf(harvesterId) > 0
-		when: "When harvester is packaged with a destination set, "
+		when: "Harvester is packaged with a destination set, "
 			controller.response.reset()
 			controller.params.destFileName = harvesterId + "-custompackage.zip" 			
 			controller.pack()
@@ -132,7 +132,7 @@ class HarvesterControllerSpec extends IntegrationSpec {
 			controller.response.contentAsByteArray.length > 0
 			controller.response.containsHeader("Content-disposition")
 			controller.response.getHeader("Content-disposition").indexOf(controller.params.destFileName) > 0
-		when: "When the harvester is deleted"
+		when: "The harvester is deleted"
 			controller.response.reset()
 			controller.remove()
 			jsonResponse = slurper.parseText(controller.response.contentAsString)				

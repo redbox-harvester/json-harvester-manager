@@ -64,12 +64,12 @@ grails.project.dependency.resolution = {
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
+        //mavenRepo "http://repository.jboss.com/maven2/"		
     }
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
-		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT")
+		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT", "org.apache.ant:ant:1.8.4")
 		test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
     }
 
@@ -79,7 +79,7 @@ grails.project.dependency.resolution = {
 		build ":release:3.0.1"
 
         // plugins for the compile step
-        compile ":scaffolding:2.0.1"
+        compile ":scaffolding:2.0.1"		
         //compile ':cache:1.1.1'		
 
         // plugins needed at runtime but not for compilation

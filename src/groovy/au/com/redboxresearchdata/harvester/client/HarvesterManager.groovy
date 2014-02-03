@@ -138,8 +138,7 @@ class HarvesterManager {
 			return [success:false, message:msg]
 		}
 		if (packagePath != "") {
-			log.debug("Adding client classpath:" + packagePath)
-			HarvesterManager.class.classLoader.addClasspath(packagePath)
+			log.debug("Expanding client package:" + packagePath)			
 			AntBuilder ant = new AntBuilder()
 			ant.unzip(src: packagePath, dest:config.harvest.base + harvesterId, overwrite:false)
 		}

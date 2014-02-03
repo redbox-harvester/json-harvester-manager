@@ -24,20 +24,21 @@ class BootStrap {
 	def grailsApplication
 	def harvesterManager
 	
-    def init = { servletContext ->		
-		BootStrap.class.classLoader.addClasspath(grailsApplication.config.harvest.base)
+    def init = { servletContext ->
+		log.info("BootStrap starting...")				
 		def userHome = grailsApplication.config.userHome
 		def appName = grailsApplication.config.appName
 		// load the main web runtime configuration
 		def binding = [userHome:userHome, appName:appName]
 		def env = Environment.current.toString().toLowerCase()
-		def baseDir = "${userHome}/.${appName}-${env}/"		
+		def baseDir = "${userHome}/.${appName}-${env}/"
+		log.info("Init/loading the main config...")		
 		def runtimeConfig = Config.getConfig(env, "main-config.groovy", baseDir, binding)								
 		grailsApplication.config.runtimeConfig = runtimeConfig
 		harvesterManager.autoStart()		
     }
     def destroy = {
-		log.debug("Harvester web client stopping...")
+		log.info("Harvester web client stopping...")
 		harvesterManager.stopAll()
     }
 }
