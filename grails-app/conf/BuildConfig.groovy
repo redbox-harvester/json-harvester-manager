@@ -47,7 +47,7 @@ grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
         // specify dependency exclusions here; for example, uncomment this to disable ehcache:
-        // excludes 'ehcache'
+        // excludes 'ehcache'		
     }
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
@@ -69,7 +69,12 @@ grails.project.dependency.resolution = {
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
-		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT", "org.apache.ant:ant:1.8.4")
+		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT", "org.apache.ant:ant:1.8.4") {
+			excludes "servlet-api", "gossip"
+		}
+		runtime () {
+			excludes "gossip"
+		}
 		test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
     }
 

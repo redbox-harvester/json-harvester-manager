@@ -45,14 +45,14 @@ class Harvester {
 	 * 
 	 * @return
 	 */
-	def start() {
+	def start() {		
 		if (appContext) {
 			def msg = "Harvester has already started, ignoring start request:" + config.client.harvesterId
 			log.debug(msg)
 			return [success:false, message:msg]
 		}
 		config.client.classPathEntries?.each {
-			String entryTargetPath = config.client.base + it			
+			String entryTargetPath = config.client.base + it					
 			addToClasspath(entryTargetPath)					
 		}
 
@@ -76,9 +76,11 @@ class Harvester {
 			log.debug(msg)
 			return [success:false, message:msg]
 		}
-		log.debug("Harvester stopping:" + config.client.harvesterId + ", using inbound adapter:" + config.client.inboundAdapter.toString())		
-		AbstractEndpoint inboundEndpoint = appContext.getBean(config.client.inboundAdapter.toString(), AbstractEndpoint.class)
-		inboundEndpoint.stop()
+		log.debug("Harvester stopping:" + config.client.harvesterId + ", using mbean exporter:" + config.client.mbeanExporter.toString())
+		def mbeanExporter = appContext.getBean(config.client.mbeanExporter.toString())
+		def gracefulShutdownTimeout = config.client.orderlyShutdownTimeout ? config.client.orderlyShutdownTimeout : 5000 // defaults to 5 seconds			
+		mbeanExporter.stopActiveComponents(false, gracefulShutdownTimeout) 
+		log.debug("Mbeanexporter stopActiveComponents returned, stopping appContext...")
 		appContext.stop()
 		appContext = null
 		def msg = "Harvester stopped:" + config.client.harvesterId
@@ -91,12 +93,14 @@ class Harvester {
 	}
 	
 	def addToClasspath(String entryTargetPath) {
-		if (!entryTargetPath.startsWith("file")) {
-			entryTargetPath = "file://" + entryTargetPath
+		File entryPathFile = new File(entryTargetPath)
+		if (!entryPathFile.exists()) {
+			log.error("Attempted to add a non-existent file: ${entryTargetPath}")
+			return
 		}
 		log.debug "Attempting to dynamically add stuff to the classpath..."
-		def classLoader = Harvester.class.classLoader
-		log.debug("Adding to classpath:" + entryTargetPath)
-		classLoader.addURL(new URL(entryTargetPath))
+		def classLoader = FileSystemXmlApplicationContext.class.getClassLoader()		
+		classLoader.addURL(entryPathFile.toURI().toURL())						
+		log.debug("Added to classpath:" + entryTargetPath)
 	}
 }
