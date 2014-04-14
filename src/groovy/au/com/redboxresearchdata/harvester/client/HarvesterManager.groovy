@@ -36,7 +36,7 @@ class HarvesterManager {
 			load()
 		}
 		harvesters.each {
-			if (it.value.config.web?.autoStart)
+			if (it.value.config.client?.autoStart)
 				start(it.key)
 		}		
 	}
