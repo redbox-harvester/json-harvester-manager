@@ -20,14 +20,17 @@ package au.com.redboxresearchdata.harvester.client
 import java.util.jar.JarFile
 import java.util.zip.ZipEntry
 import org.codehaus.groovy.grails.commons.spring.GrailsWebApplicationContext
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.FileSystemXmlApplicationContext
+import org.springframework.context.support.GenericApplicationContext
 import org.springframework.integration.Message
 import org.springframework.integration.MessageChannel
 import org.springframework.integration.endpoint.AbstractEndpoint
 import org.springframework.integration.message.GenericMessage
 import org.springframework.integration.support.MessageBuilder
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.FileSystemResource
 
 /** Represents an instance of a Harvester
  * 
@@ -38,7 +41,7 @@ import org.springframework.core.io.ClassPathResource
 class Harvester {
 	def config
 	def appContext
-		
+	def siThread	
 			
 	/**
 	 * Starts the harvester application context
@@ -55,12 +58,25 @@ class Harvester {
 			String entryTargetPath = config.client.base + it					
 			addToClasspath(entryTargetPath)					
 		}
-
-		ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
-		String[] locs = ["file:"+config.client.siPath]
-		appContext = new FileSystemXmlApplicationContext(locs, true, parentContext)		
-		appContext.registerShutdownHook()
-		def msg = "Harvester started: "+config.client.harvesterId 		
+		def msg = "Harvester started: "+config.client.harvesterId 
+		if (config.client.spawnThread) {
+			log.debug("Preparing to start SI context: "+config.client.harvesterId)
+			ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
+			appContext = new GenericApplicationContext(parentContext)
+			XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(appContext)
+			xmlReader.loadBeanDefinitions(new FileSystemResource(config.client.siPath))
+			siThread = Thread.start {
+				log.debug("Starting SI context: "+config.client.harvesterId)
+				appContext.refresh()
+				log.debug("Stopped SI context, thread exiting: "+config.client.harvesterId)
+			}
+			msg = "Harvester started asynchly, you may want to check its status later: "+config.client.harvesterId
+		} else {
+			ApplicationContext parentContext = (ApplicationContext)config.runtime.parentContext
+			String[] locs = ["file:"+config.client.siPath]
+			appContext = new FileSystemXmlApplicationContext(locs, true, parentContext)
+			appContext.registerShutdownHook()
+		}
 		log.debug(msg)
 		return [success:true, message:msg]
 	}
@@ -83,6 +99,7 @@ class Harvester {
 		log.debug("Mbeanexporter stopActiveComponents returned, stopping appContext...")
 		appContext.stop()
 		appContext = null
+		siThread = null
 		def msg = "Harvester stopped:" + config.client.harvesterId
 		log.debug(msg)
 		return [success:true, message:msg]
