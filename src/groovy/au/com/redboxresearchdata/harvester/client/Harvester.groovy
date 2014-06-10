@@ -106,7 +106,7 @@ class Harvester {
 	}
 	
 	def isStarted() {
-		return appContext != null && appContext.isRunning()
+		return appContext != null 
 	}
 	
 	def addToClasspath(String entryTargetPath) {

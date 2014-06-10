@@ -70,7 +70,7 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 		compile ("au.com.redboxresearchdata:json-harvester-client:1.0.0.BUILD-SNAPSHOT","au.com.redboxresearchdata:utilities:1.0.0.BUILD-SNAPSHOT", "org.apache.ant:ant:1.8.4") {
-			excludes "servlet-api", "gossip"
+			excludes "servlet-api", "gossip", "spring-asm"
 		}
 		runtime () {
 			excludes "gossip"
@@ -80,18 +80,18 @@ grails.project.dependency.resolution = {
 
     plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.47"
+        build ":tomcat:7.0.52.1"
 		build ":release:3.0.1"
 
         // plugins for the compile step
-        compile ":scaffolding:2.0.1"		
+        compile ":scaffolding:2.1.1"		
         //compile ':cache:1.1.1'		
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate:3.6.10.6" // or ":hibernate4:4.1.11.6"
-        runtime ":database-migration:1.3.8"
-        runtime ":jquery:1.10.2.2"
-        runtime ":resources:1.2.1"
+        //runtime ":hibernate:3.6.10.6" // or ":hibernate4:4.1.11.6"
+        runtime ":database-migration:1.4.0"
+        runtime ":jquery:1.11.0.2"
+        runtime ":resources:1.2.8"
 		
 		test(":spock:0.7") {
 	      exclude "spock-grails-support"
