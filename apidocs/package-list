@@ -1,0 +1,4 @@
+DefaultPackage
+au.com.redboxresearchdata.harvester.client
+au.com.redboxresearchdata.harvester.client.api.controller
+spring

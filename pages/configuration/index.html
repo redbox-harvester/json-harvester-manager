@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Meta -->
+	<meta charset="utf-8" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+	<!-- Use the .htaccess and remove these lines to avoid edge case issues.
+		 More info: h5bp.com/i/378 -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<!-- Our site title and description -->
+	<title>Configuration | ReDBox Harvester Manager</title>
+	<meta name="description" content="Documentation for the ReDBox Harvester Manager, a deployment platform for Harvester Client." />
+	<meta name="keywords" content="ReDBox, Research, Data, Data Integration, Spring Integration, Spring, Groovy" />
+	<meta name="author" content="Shilo Banihit" />
+
+	<!-- Output DocPad produced meta elements -->
+	<meta name="generator" content="DocPad v6.69.0" />
+
+	<!-- Mobile viewport optimized: h5bp.com/viewport -->
+	<meta name="viewport" content="width=device-width" />
+
+	<!-- Icons -->
+		<link rel="shortcut icon" href="images/icons/favicon.ico">
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/icons/apple-touch-icon-144-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/icons/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/icons/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="images/icons/apple-touch-icon-57-precomposed.png">
+
+	<!-- Shims: IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script type="text/javascript">
+		var projName = "/json-harvester-manager";
+		var siteUrl = "http://harvester-manager-snapshot.redboxresearchdata.com.au/";
+		var needsRewrite = function() {
+			var pathname = location.pathname;
+			return pathname.indexOf(projName) == 0 || pathname.indexOf("/release") == 0;
+		};
+		var getNewPath = function(projName, pathName) {
+			var newPath = projName;
+			if (pathName.indexOf(projName) == -1) {
+				newPath = "/release";
+				var releaseNumMatch = pathName.match(/\/release\/(.*)/);
+				if (releaseNumMatch != null && releaseNumMatch[1] != "") {
+					var pathCompArr = releaseNumMatch[1].split("/");
+					newPath = newPath + "/" + pathCompArr[0];
+				}
+			}
+			return newPath;
+		};
+		var parseUrl = function(url) {
+			var parser =  document.createElement('a');
+			parser.href = url;
+			return parser;
+		};
+		var writeElement = function(arr, prefix, suffix ) {
+			var rewrite = needsRewrite();
+			var newPath = "";
+			if (rewrite) {
+				newPath = getNewPath(projName, location.pathname);
+			} 
+			for (var i=0; i<arr.length; i++) {
+				var curPath = arr[i];
+				var parser = parseUrl(curPath); 
+				if (parser.host == location.host) {
+					curPath = newPath + curPath;
+				}
+				document.write(prefix+curPath+suffix);
+			}
+		};
+		
+		var writeStyles = function() {
+			var stylesArr = "/styles/twitter-bootstrap.css,/styles/style.css,/styles/stickyfooter.css".split(",");
+			var prefix = "<link  rel='stylesheet' href='";
+			var suffix = "' />";
+			writeElement(stylesArr, prefix, suffix);
+		};
+		
+		var writeScripts = function() {
+			var scriptsArr = "//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js,//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js,/vendor/twitter-bootstrap/dist/js/bootstrap.min.js,/scripts/script.js".split(",");
+			var prefix = "<script defer='defer' src=\"";
+			var suffix = "\"></ script>";
+			writeElement(scriptsArr, prefix, suffix);
+		};
+		writeStyles();
+	</script>
+</head>
+<body>
+	<!-- Menu -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<div class="navbar-brand"><a class="navbar-link rewritable-url" href="http://harvester-snapshot.redboxresearchdata.com.au/">ReDBox Harvester</a> - <a class="navbar-link rewritable-url" href="http://harvester-manager-snapshot.redboxresearchdata.com.au/">Harvester Manager </a></div>
+				
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					
+						<li
+							typeof="sioc:Page"
+							about="/pages/installation"
+							class=""
+						>
+							<a href="/pages/installation" property="dc:title" class="rewritable-url">
+								Installation
+							</a>
+						</li>
+					
+						<li
+							typeof="sioc:Page"
+							about="/pages/configuration"
+							class="active"
+						>
+							<a href="/pages/configuration" property="dc:title" class="rewritable-url">
+								Configuration
+							</a>
+						</li>
+					
+						<li
+							typeof="sioc:Page"
+							about="/pages/api"
+							class=""
+						>
+							<a href="/pages/api" property="dc:title" class="rewritable-url">
+								REST-Like API
+							</a>
+						</li>
+					
+
+					<li>
+					<a href="/apidocs/" target="_blank" class="rewritable-url">API</a>
+					</li>
+				</ul>
+			</div><!--/.navbar-collapse -->
+		</div>
+	</div>
+
+	<!-- Content -->
+	<div class="container">
+		<!-- Content -->
+		<section id="content" class="content">
+			<article id="page" class="page">
+	<h1>Configuration</h1>
+	<div class="page-content"><h3 id="harvester-client-required-configuration">Harvester Client required configuration</h3>
+<p>Information below pertains to configuration entries in Harvester Client implementations that are required by Harvester Manager.</p>
+<table class="table table-bordered table-striped">
+  <tr>
+    <th>Configuration Entry</th>
+    <th>Purpose</th>
+    <th>Remarks</th>
+  </tr>
+  <tr>
+      <td>client.harvesterId</td>
+      <td>
+          A string to identify this harvester or this harvester&#39;s configuration. This string will become part of the client&#39;s output.
+      </td>
+      <td>
+          In cases where the harvester is deployed inside the Manager, this setting can be a external variable &quot;harvesterId&quot; which is passed into the configuration by the Manager. This allows for dynamic configuration of a client by the Manager. The string is guaranteed to be unique by the Manager.
+      </td>
+  </tr>
+  <tr>
+      <td>client.base</td>
+      <td>
+          The base directory where this client will execute.
+      </td>
+      <td>
+          The setting can optionally prefix the &quot;managerBase&quot; variable passed into the configuration by the Manager, as a measure of ensuring that the intended directory is writeable. 
+          The setting will be prefixed to the &quot;client.classPathEntries&quot; elements.
+      </td>
+  </tr>
+  <tr>
+      <td>client.classPathEntries</td>
+      <td>
+          Specifies file locations that will be added to the system-wide classpath when this Harvester is deployed.
+      </td>
+      <td>
+          This is specific to the Manager. Console deployments set the classpath manually. Typically, console deployments add &quot;resources/lib/*&quot; to the classpath on harvester start up.
+      </td>
+  </tr>
+  <tr>
+      <td>client.mbeanExporter</td>
+      <td>
+          Name of the component that acts as the MBeanExporter.
+      </td>
+      <td>
+          The Manager will call methods in this bean to inorder to stop the Spring Integration channels.
+      </td>
+  </tr>
+  <tr>
+      <td>client.autoStart</td>
+      <td>
+          Controls whether this harvester will be started when upon its deployment inside the Manager.<br>      </td>
+      <td>
+          When set to false, the harvester will have to be manually started.
+      </td>
+  </tr>
+  <tr>
+      <td>client.orderlyShutdownTimeout</td>
+      <td>
+          The amount in ms the SI framework waits before channels are forcibly closed. 
+      </td>
+      <td>
+      </td>
+  </tr>
+  <tr>
+      <td>activemq.url</td>
+      <td>
+          The ActiveMQ url where the data will be sent.
+      </td>
+      <td>
+      </td>
+  </tr>
+</table>
+
+<h3 id="manager-configuration">Manager configuration</h3>
+<p>The table below describes base configuration options of the Manager. The entries below are stored inside the <a href="https://github.com/redbox-mint-contrib/json-harvester-manager/blob/master/src/java/main-config.groovy">&quot;main-config.groovy&quot;</a> file. </p>
+<p><table class="table table-bordered table-striped">
+  <tr>
+    <th>Configuration Entry</th>
+    <th>Purpose</th>
+    <th>Remarks</th>
+  </tr>
+  <tr>
+      <td>clients</td>
+      <td>
+           Contains a map of the harvesterID and its configuration. Defaults config specifies an empty map &quot;[:]&quot;.
+      </td>
+      <td>
+          You can manually add entries into the configuration entry if you want to bypass the API.
+      </td>
+  </tr>
+  <tr>
+      <td>harvest.base</td>
+      <td>
+          Base directory where all harvester-related artifacts are expanded. This directory also the Manager&#39;s working directory, and contains the configuration as well as the logs directory.
+      </td>
+      <td>
+          The value must end with a directory delimiter (e.g. &quot;/&quot;) accepted by the OS.
+      </td>
+  </tr>
+  <tr>
+      <td>templates</td>
+      <td>
+          Optional. Used when &quot;cloning&quot; or creating harvester using a template Harvester.
+      </td>
+      <td>
+          This closure specifies the closure configuration for templates (a.k.a. Harvesters) that are available for cloning. The template closures must have:
+        &quot;location&quot; - the URL of the Harvester zip file.
+        &quot;description&quot; - the textual description of this Harvester.
+      </td>
+  </tr></p>
+</div>
+</article>
+		</section>
+	</div><!-- /container -->
+	<!-- Footer -->
+	<div class="footer">
+		<div class="container">
+			<div class="col-md-6">
+				<div class="panel-body text-center">
+					<a href="http://harvester-snapshot.redboxresearchdata.com.au/" class="btn btn-default btn-med rewritable-url">Main Documentation</a>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="panel-body text-center">
+					<a href="http://harvester-manager-snapshot.redboxresearchdata.com.au/" class="btn btn-default btn-med rewritable-url">Harvester Manager Documentation</a>
+				</div>
+			</div>
+			<p class="pull-left">&copy; 2014 <a href="http://www.qcif.edu.au/" target="_blank">Queensland Cyber Infrastructure Foundation</a></p>
+			<p class="pull-right">This website was last updated at 2014-07-09T00:44:45.910Z</p>
+		</div>
+    </div>
+	<!-- Scripts -->
+	<script type="text/javascript">
+		onload = function () {
+			if (location.hostname.indexOf("github.io") >= 0) {
+				location.href = siteUrl + location.pathname.replace(projName+"/", "") + location.search + location.hash;
+			}
+			var pathname = location.pathname;
+			if (needsRewrite()) {
+				rewriteNavLinkUrl(projName, pathname);
+			}
+		};		
+		var rewriteNavLinkUrl = function(projName, pathName) {
+			var newPath = getNewPath(projName, pathName);			
+			for (var i = 0; i < document.links.length; i++) {
+				if (document.links[i].className.indexOf("rewritable-url") >= 0 ) {
+					var parser = parseUrl(document.links[i].href);
+					document.links[i].href =  parser.protocol + "//" + parser.host + newPath + parser.pathname + parser.search + parser.hash;
+				}
+			}			
+		};
+		writeScripts();
+	</script>
+</body>
+</html>
