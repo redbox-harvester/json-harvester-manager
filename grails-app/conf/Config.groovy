@@ -157,3 +157,5 @@ log4j = {
 		   'org.hibernate',
 		   'net.sf.ehcache.hibernate'
 }
+grails.doc.title = "ReDBox Harvester Manager APIDocs"
+grails.doc.footer = "Copyright 2014 - Queensland Cyber Infrastructure Foundation"

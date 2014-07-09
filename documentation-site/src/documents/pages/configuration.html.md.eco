@@ -1,0 +1,122 @@
+---
+title: Configuration
+layout: page
+pageOrder: 2
+---
+
+
+### Harvester Client required configuration
+
+Information below pertains to configuration entries in Harvester Client implementations that are required by Harvester Manager.
+
+<table class="table table-bordered table-striped">
+  <tr>
+    <th>Configuration Entry</th>
+    <th>Purpose</th>
+    <th>Remarks</th>
+  </tr>
+  <tr>
+  	<td>client.harvesterId</td>
+  	<td>
+  		A string to identify this harvester or this harvester's configuration. This string will become part of the client's output.
+  	</td>
+  	<td>
+  		In cases where the harvester is deployed inside the Manager, this setting can be a external variable "harvesterId" which is passed into the configuration by the Manager. This allows for dynamic configuration of a client by the Manager. The string is guaranteed to be unique by the Manager.
+  	</td>
+  </tr>
+  <tr>
+  	<td>client.base</td>
+  	<td>
+  		The base directory where this client will execute.
+  	</td>
+  	<td>
+  		The setting can optionally prefix the "managerBase" variable passed into the configuration by the Manager, as a measure of ensuring that the intended directory is writeable. 
+  		The setting will be prefixed to the "client.classPathEntries" elements.
+  	</td>
+  </tr>
+  <tr>
+  	<td>client.classPathEntries</td>
+  	<td>
+  		Specifies file locations that will be added to the system-wide classpath when this Harvester is deployed.
+  	</td>
+  	<td>
+  		This is specific to the Manager. Console deployments set the classpath manually. Typically, console deployments add "resources/lib/*" to the classpath on harvester start up.
+  	</td>
+  </tr>
+  <tr>
+  	<td>client.mbeanExporter</td>
+  	<td>
+  		Name of the component that acts as the MBeanExporter.
+  	</td>
+  	<td>
+  		The Manager will call methods in this bean to inorder to stop the Spring Integration channels.
+  	</td>
+  </tr>
+  <tr>
+  	<td>client.autoStart</td>
+  	<td>
+  		Controls whether this harvester will be started when upon its deployment inside the Manager.	
+  	</td>
+  	<td>
+  		When set to false, the harvester will have to be manually started.
+  	</td>
+  </tr>
+  <tr>
+  	<td>client.orderlyShutdownTimeout</td>
+  	<td>
+  		The amount in ms the SI framework waits before channels are forcibly closed. 
+  	</td>
+  	<td>
+  	</td>
+  </tr>
+  <tr>
+  	<td>activemq.url</td>
+  	<td>
+  		The ActiveMQ url where the data will be sent.
+  	</td>
+  	<td>
+  	</td>
+  </tr>
+</table>
+
+### Manager configuration
+
+The table below describes base configuration options of the Manager. The entries below are stored inside the ["main-config.groovy"][managerConfig] file. 
+
+<table class="table table-bordered table-striped">
+  <tr>
+    <th>Configuration Entry</th>
+    <th>Purpose</th>
+    <th>Remarks</th>
+  </tr>
+  <tr>
+  	<td>clients</td>
+  	<td>
+  		 Contains a map of the harvesterID and its configuration. Defaults config specifies an empty map "[:]".
+  	</td>
+  	<td>
+  		You can manually add entries into the configuration entry if you want to bypass the API.
+  	</td>
+  </tr>
+  <tr>
+  	<td>harvest.base</td>
+  	<td>
+  		Base directory where all harvester-related artifacts are expanded. This directory also the Manager's working directory, and contains the configuration as well as the logs directory.
+  	</td>
+  	<td>
+  		The value must end with a directory delimiter (e.g. "/") accepted by the OS.
+  	</td>
+  </tr>
+  <tr>
+  	<td>templates</td>
+  	<td>
+  		Optional. Used when "cloning" or creating harvester using a template Harvester.
+  	</td>
+  	<td>
+  		This closure specifies the closure configuration for templates (a.k.a. Harvesters) that are available for cloning. The template closures must have:
+		"location" - the URL of the Harvester zip file.
+		"description" - the textual description of this Harvester.
+  	</td>
+  </tr>
+  
+[managerConfig]:https://github.com/redbox-mint-contrib/json-harvester-manager/blob/master/src/java/main-config.groovy

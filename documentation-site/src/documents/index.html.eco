@@ -1,0 +1,11 @@
+---
+layout: 'default'
+title: 'Manager-Home'
+---
+<div class="jumbotron">
+	<h2>Harvester Manager Documentation</h2>
+	<p> 
+		This documentation describes the Harvester Manager, a deployment platform for implementations of <a href="<%= @client.url %>" class="rewritable-url">Harvester Clients</a>. 
+		If you want to deploy a Harvester Client in a production setting, you have come to the right place.
+	</p>
+</div>

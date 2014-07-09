@@ -1,0 +1,27 @@
+```
+title: Installation
+layout: page
+pageOrder: 1
+``` 
+
+The Harvester Manager is a Grails application that exposes an API through which administrators or external applications can control the harvesters. 
+As of writing, the API is unsecured and assumes that the server is running on a secured network. 
+The code snippets below apply to Ubuntu 12.04 32-bit instance with Tomcat 7. 
+Please adjust the commands as it pertains to your distribution and software stack of choice.
+
+#### Install an application server, e.g. Tomcat. Use 8080 as the server port.
+
+Install Tomcat7 on Debian-based (e.g. Ubuntu) distros:
+
+	sudo apt-get -y install tomcat7 tomcat7-admin
+	sudo chmod g+w /usr/share/tomcat7
+
+#### [Download the harvester manager war file][ManagerWarSnapshot] and install it using the application-server specific method.
+Deploying the Manager to Tomcat in a Ubuntu server:
+	
+	curl -L -o json-harvester-manager.war "http://dev.redboxresearchdata.com.au/nexus/service/local/artifact/maven/redirect?r=snapshots&g=au.com.redboxresearchdata&a=json-harvester-manager&v=LATEST&e=war"
+	sudo cp json-harvester-manager.war /var/lib/tomcat7/webapps/json-harvester-manager.war.tmp
+ 
+	sudo mv /var/lib/tomcat7/webapps/json-harvester-manager.war.tmp /var/lib/tomcat7/webapps/json-harvester-manager.war
+
+[ManagerWarSnapshot]:http://dev.redboxresearchdata.com.au/nexus/service/local/artifact/maven/redirect?r=snapshots&g=au.com.redboxresearchdata&a=json-harvester-manager&v=LATEST&e=war

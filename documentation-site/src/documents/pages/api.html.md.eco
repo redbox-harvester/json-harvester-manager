@@ -1,0 +1,77 @@
+---
+title: REST-Like API
+layout: page
+pageOrder: 4
+---
+
+
+The "API" are URLs that can be used to control harvesters within the Harvester Manager. When the return value is not explicitly stated, these URLs return a JSON document indicating the "status" of the request: if it has successfully processed it, and if not the "message" indicating the possible reason why the request had failed, e.g.:
+ 
+	{"status":"true", "message":""}
+ 
+#### /json-harvester-manager/harvester/
+
+Returns a JSON array of  installed harvesters.
+
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/
+
+#### /json-harvester-manager/harvester/createFromTemplate/HarvesterId?template=TemplateName
+
+Clones the harvester client configuration specified by "TemplateName" and installs it as "HarvesterId". The template name must be configured in the server, and the harvester "HarvesterId" must be a unique string. For configuring templates, see configuration section below.
+	
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/createFromTemplate/myHarvester?template=redboxSampleJdbcHarvester
+
+#### /json-harvester-manager/harvester/start/HarvesterId
+
+Starts the harvester identified by "HarvesterId". The harvester must exist. If the harvester is already started, the request is ignored.
+
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/start/myHarvester
+
+####/json-harvester-manager/harvester/stop/HarvesterId
+
+Stops the harvester identified by "HarvesterId". The harvester must exist. If the harvester is stopped, the request is ignored.
+ 
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/stop/myHarvester
+
+####/json-harvester-manager/harvester/remove/HarvesterId
+
+Uninstalls the harvester identified by "HarvesterId" from the Manager and deletes its resources from the filesystem. 
+
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/remove/myHarvester
+
+####/json-harvester-manager/harvester/isStarted/HarvesterId
+ 
+Returns true if this harvester is started.
+ 
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/isStarted/myHarvester
+ 
+####/json-harvester-manager/harvester/listTemplates
+
+Returns a JSON array of configured templates.
+ 
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/listTemplates
+
+####/json-harvester-manager/harvester/getTemplateLocation/TemplateName
+ 
+Returns the package location for this template.
+ 
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/getTemplateLocation/redboxSampleJdbcHarvester
+
+####/json-harvester-manager/harvester/getTemplateDescription/TemplateName
+ 
+Returns the description for this template.
+	
+	curl -i -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/getDescription/redboxSampleJdbcHarvester
+	
+####/json-harvester-manager/harvester/pack/HarvesterId?destFileName=DestinationFileName
+
+Returns a compressed file containing all of the harvester resources  identified by "DestinationFileName". The "destFileName" only accepts file names.
+
+	curl -H "Accept: application/json" --remote-name --remote-header-name http://localhost:8080/json-harvester-manager/harvester/pack/myHarvester?destFileName=myHarvester-package.zip
+
+####/json-harvester-manager/harvester/upload/HarvesterId
+ 
+Installs the zip package specified "harvesterPackage" parameter on the request as the "HarvesterId". 
+ 
+	curl -i -F "harvesterPackage=@myHarvester-package.zip" -H "Accept: application/json" http://localhost:8080/json-harvester-manager/harvester/upload/myHarvester2
+ 
